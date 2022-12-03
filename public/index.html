@@ -91,7 +91,7 @@
 
       const username = prompt('Please enter a name: ');
       append_child(username + 'has connected.');
-      socket.emit('new_connection', username);
+      socket.emit('connection', username); // or new_connection
 
       /** Upon mouseclick, emit data and append field data. 
        * @param event: 
@@ -123,7 +123,8 @@
 
           socket.emit('username', username);
           append_child(username + ' has connected.');
-          field_username.innerHtml = '';
+          field_username.value = '';
+          window.scrollTo(0, document.body.scrollHeight);
         }
       });
 
