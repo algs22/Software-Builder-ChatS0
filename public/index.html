@@ -1,0 +1,145 @@
+<!--Navigation file for chatrooms, information, etc. -->
+
+<!DOCTYPE html>
+<html>
+  <head lang="en">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Main Page</title>
+    <!-- <link rel="stylesheet" href="/styles.css"/> -->
+    <style> 
+      * {
+          background-color: RGB(50, 50, 50);
+          color: white;
+      }
+
+      body {
+          padding: 0;
+          margin: 0; 
+          padding-bottom: 3rem; 
+          font-family: Arial, sans-serif;
+          display: flex; 
+      }
+
+      #board {}
+      #container_input {
+        justify-content: left;
+        padding: 5px;
+        width: 80%;
+        max-width: 1000px;   
+      }
+      #container_msg {
+        justify-content: left;
+        padding: 5px;
+      }
+      #container_username {
+        justify-content: left;
+        padding: 5px;
+      }
+      #field_username {}
+      #field_msg {}
+      #button_username {}
+      #button_msg {}
+      #info {}
+
+      .Rooms {}
+      .Threads {}
+    </style>
+  </head>
+
+  <body>
+    <h1 id="name">Main Page</h1>
+
+    <!--<p1> Set the username for display.-->
+    <!--<p2> Display the message text onscreen.-->
+    <div id="container_input">
+      <p id= "container_username">
+        <input id="field_username" type="text">
+        <button id="btn_username">Set</button>
+      </p>
+      <textarea id="board" type="text" style="height: 300px; width: 500px;"></textarea>
+      <p id="container_msg">
+        <input id="field_msg" type="text"/>
+        <button id="btn_msg">Send Message</button>
+      </p>
+    </div>
+
+    <!--Instances of different chatrooms.-->
+    <div class="Rooms">
+      <a href="">Chat1</a>
+      <a href="">Chat2</a>
+    </div>
+
+    <!--Varying thread discussions.-->
+    <div class="Threads">
+      <a href="">Recent</a>
+      <a href="">Oldest</a>
+    </div>
+
+    <a href="" id="info">About</a>
+    <!-- <script src="/index.js"></script> -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.4/socket.io.js"></script>
+    <script> 
+      var socket = io('http://localhost:8080');
+      var field_username = document.getElementById('field_username');
+      var field_msg = document.getElementById('field_msg');
+      var btn_username = document.getElementById('btn_username');
+      var btn_msg = document.getElementById('btn_msg');
+      var board = document.getElementById('board');
+      var user;
+
+      const username = prompt('Please enter a name: ');
+      append_child(username + 'has connected.');
+      socket.emit('new_connection', username);
+
+      /** Upon mouseclick, emit data and append field data. 
+       * @param event: 
+       * */
+      btn_msg.addEventListener('click', function(event) {
+        event.preventDefault();
+
+        // Send content contained in the field.
+        if (field_msg.value != '') {
+          const msg = field_msg.value;
+          
+          socket.emit('message', username + ': ' + msg);
+          append_child(msg);
+          field_msg.value = '';
+          window.scrollTo(0, document.body.scrollHeight);
+         }
+      });
+
+      /** Upon mouseclick, update the username field. 
+       * @param event: 
+       * */
+      btn_username.addEventListener('click', function(event) {
+        event.preventDefault();
+        console.log(socket.id + " is attempting to log in as " + field_username.value);
+
+        // Set content contained in the field.
+        if (field_username.value != '') {
+          const username = field_username.value;
+
+          socket.emit('username', username);
+          append_child(username + ' has connected.');
+          field_username.innerHtml = '';
+        }
+      });
+
+      /** Append data to html element textarea. 
+       * @param data: Message to append. 
+       * */
+      function append_child(data) {
+        const new_item = document.createElement('div');
+        
+        new_item.innerText = data;
+        board.append(new_item);
+      }
+
+      socket.on('disconnect', (username) => {
+        append_child(username + ' disconnected.');
+      });
+    </script>
+  </body>
+</html>
